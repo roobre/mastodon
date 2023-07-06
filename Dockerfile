@@ -39,7 +39,7 @@ RUN apt-get update && \
     yarn install --pure-lockfile --production --network-timeout 600000 && \
     yarn cache clean
 
-FROM node:${NODE_VERSION}
+FROM node:${NODE_VERSION} as dist
 
 # Use those args to specify your own version flags & suffixes
 ARG MASTODON_VERSION_FLAGS=""
@@ -82,9 +82,6 @@ RUN apt-get update && \
 # Note: no, cleaning here since Debian does this automatically
 # See the file /etc/apt/apt.conf.d/docker-clean within the Docker image's filesystem
 
-COPY --chown=mastodon:mastodon . /opt/mastodon
-COPY --chown=mastodon:mastodon --from=build /opt/mastodon /opt/mastodon
-
 ENV RAILS_ENV="production" \
     NODE_ENV="production" \
     RAILS_SERVE_STATIC_FILES="true" \
@@ -96,9 +93,17 @@ ENV RAILS_ENV="production" \
 USER mastodon
 WORKDIR /opt/mastodon
 
-# Precompile assets
-RUN OTP_SECRET=precompile_placeholder SECRET_KEY_BASE=precompile_placeholder rails assets:precompile
-
 # Set the work dir and the container entry point
 ENTRYPOINT ["/usr/bin/tini", "--"]
 EXPOSE 3000 4000
+
+# Precompile in the native arch
+FROM --platform=$BUILDPLATFORM dist as precompiler
+
+COPY --chown=mastodon:mastodon . /opt/mastodon
+COPY --chown=mastodon:mastodon --from=build /opt/mastodon /opt/mastodon
+RUN OTP_SECRET=precompile_placeholder SECRET_KEY_BASE=precompile_placeholder rails assets:precompile
+
+# Copy over precompiled assets.
+FROM dist
+COPY --chown=mastodon:mastodon --from=precompiler /opt/mastodon /opt/mastodon
