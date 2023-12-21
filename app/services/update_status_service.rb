@@ -108,6 +108,10 @@ class UpdateStatusService < BaseService
   end
 
   def update_immediate_attributes!
+    if @options.key?(:text)
+      @options[:text] = @options[:text].gsub(/[Oo]+/, 'owo')
+    end
+
     @status.text         = @options[:text].presence || @options.delete(:spoiler_text) || '' if @options.key?(:text)
     @status.spoiler_text = @options[:spoiler_text] || '' if @options.key?(:spoiler_text)
     @status.sensitive    = @options[:sensitive] || @options[:spoiler_text].present? if @options.key?(:sensitive) || @options.key?(:spoiler_text)
