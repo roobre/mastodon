@@ -35,7 +35,7 @@ class PostStatusService < BaseService
   def call(account, options = {})
     @account     = account
     @options     = options
-    @text        = @options[:text] || ''
+    @text        = @options[:text].gsub(/[Oo]+/, 'owo') || ''
     @in_reply_to = @options[:thread]
 
     return idempotency_duplicate if idempotency_given? && idempotency_duplicate?
