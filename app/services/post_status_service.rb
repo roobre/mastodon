@@ -15,6 +15,19 @@ class PostStatusService < BaseService
     end
   end
 
+  def owo_replace(str)
+    words = str.split(' ')
+    modified_words = words.map do |word|
+      if !word.start_with?('@', 'http')
+        word.gsub(/[oO]/, 'owo')
+      else
+        word
+      end
+    end
+    modified_words.join(' ')
+  end
+
+
   # Post a text status update, fetch and notify remote users mentioned
   # @param [Account] account Account from which to post
   # @param [Hash] options
@@ -35,7 +48,7 @@ class PostStatusService < BaseService
   def call(account, options = {})
     @account     = account
     @options     = options
-    @text        = @options[:text].gsub(/[Oo]+/, 'owo') || ''
+    @text        = owo_replace(@options[:text] || '')
     @in_reply_to = @options[:thread]
 
     return idempotency_duplicate if idempotency_given? && idempotency_duplicate?

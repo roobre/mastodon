@@ -107,9 +107,21 @@ class UpdateStatusService < BaseService
     @poll_changed = true if @previous_expires_at != @status.preloadable_poll&.expires_at
   end
 
+  def owo_replace(str)
+    words = str.split(' ')
+    modified_words = words.map do |word|
+      if !word.start_with?('@', 'http')
+        word.gsub(/[oO]/, 'owo')
+      else
+        word
+      end
+    end
+    modified_words.join(' ')
+  end
+
   def update_immediate_attributes!
     if @options.key?(:text)
-      @options[:text] = @options[:text].gsub(/[Oo]+/, 'owo')
+      @options[:text] = owo_replace(@options[:text])
     end
 
     @status.text         = @options[:text].presence || @options.delete(:spoiler_text) || '' if @options.key?(:text)
