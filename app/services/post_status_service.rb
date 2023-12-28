@@ -19,7 +19,7 @@ class PostStatusService < BaseService
     words = str.split(' ')
     modified_words = words.map do |word|
       if !(word =~ /^\d+$/) && !word.start_with?('@', 'http', ':')
-        word.gsub(/[oO0]/, 'owo')
+        word.gsub(/[o]+/, 'owo').gsub(/[O0]+/, 'OWO')
       else
         word
       end
