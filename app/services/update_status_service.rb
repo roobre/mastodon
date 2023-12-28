@@ -110,7 +110,7 @@ class UpdateStatusService < BaseService
   def owo_replace(str)
     words = str.split(' ')
     modified_words = words.map do |word|
-      if !(word =~ /^\d+$/) && !word.start_with?('@', 'http')
+      if !(word =~ /^\d+$/) && !word.start_with?('@', 'http', ':')
         word.gsub(/[oO0]/, 'owo')
       else
         word
